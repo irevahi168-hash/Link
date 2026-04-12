@@ -6,87 +6,136 @@
     <meta name="referrer" content="no-referrer">
     <title>Watch Video - Video Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: white; }
+        .aspect-video { position: relative; padding-bottom: 56.25%; height: 0; }
+        .aspect-video iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .loading-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    </style>
 </head>
-<body class="bg-gray-900 text-white font-sans">
+<body class="font-sans">
 
-    <header class="bg-gray-800 p-4 shadow-lg">
-        <div class="container mx-auto">
-            <a href="index.html" class="text-red-500 font-bold flex items-center gap-2">
-                <span>←</span> Back to Gallery
+    <header class="bg-slate-900/80 backdrop-blur-md p-4 sticky top-0 z-50 border-b border-slate-800">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2 text-red-500 font-bold hover:text-red-400 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Back to Home
             </a>
+            <div class="text-xl font-black italic tracking-tighter">VIDEO<span class="text-red-600">HUB</span></div>
         </div>
     </header>
 
     <main class="container mx-auto px-4 py-6">
         <div class="max-w-5xl mx-auto">
             
-            <div id="playerBox" class="bg-black aspect-video rounded-xl overflow-hidden shadow-2xl ring-1 ring-gray-700 relative">
-                <div id="loading" class="w-full h-full flex items-center justify-center text-gray-500 animate-pulse">
-                    প্রক্সি সার্ভারের মাধ্যমে ভিডিও লোড হচ্ছে...
+            <div id="playerBox" class="bg-black aspect-video rounded-2xl overflow-hidden shadow-2xl ring-1 ring-slate-700">
+                <div id="loader" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-900">
+                    <div class="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p class="text-slate-400 italic text-sm loading-pulse">Secure proxy player loading...</p>
                 </div>
             </div>
             
-            <h1 id="vTitle" class="mt-5 text-lg md:text-2xl font-bold leading-tight">Loading Title...</h1>
-            <div class="mt-3 flex gap-4 text-gray-400 text-xs border-b border-gray-800 pb-5">
-                <span id="vID" class="text-red-400">ID: --</span>
-                <span id="vDur">Duration: --</span>
+            <div class="mt-6">
+                <h1 id="vTitle" class="text-xl md:text-3xl font-extrabold leading-tight text-slate-100 uppercase tracking-tight">Loading Video Title...</h1>
+                <div class="mt-4 flex flex-wrap items-center gap-3 text-slate-400 text-xs md:text-sm border-b border-slate-800 pb-6">
+                    <span id="vID" class="bg-red-600/10 text-red-500 px-3 py-1 rounded-full font-bold border border-red-600/20">ID: --</span>
+                    <span id="vDur" class="bg-slate-800 px-3 py-1 rounded-full border border-slate-700">Duration: --</span>
+                    <span class="flex items-center gap-1 text-green-500 ml-auto">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span> Live Player
+                    </span>
+                </div>
             </div>
 
-            <h2 class="text-lg font-bold mt-10 mb-6 border-l-4 border-red-500 pl-3">Recommended For You</h2>
-            <div id="rec-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+            <div class="mt-12">
+                <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                    <span class="w-2 h-6 bg-red-600 rounded-full"></span>
+                    Suggested For You
+                </h2>
+                <div id="rec-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    </div>
+            </div>
         </div>
     </main>
+
+    <footer class="bg-slate-900 p-10 mt-20 text-center border-t border-slate-800">
+        <p class="text-slate-500 text-sm italic">&copy; 2026 Developer Kabir Khan | Powered by Cloudflare Proxy</p>
+    </footer>
 
     <script>
         async function loadVideo() {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
 
+            if (!id) {
+                window.location.href = 'index.html';
+                return;
+            }
+
             try {
+                // আপনার একটি মাত্র JSON ফাইল থেকে ডেটা ফেচ করা
                 const response = await fetch('video_data.json');
                 const allVideos = await response.json();
+
                 const video = allVideos.find(v => v.id == id);
 
-                if(video) {
-                    document.title = video.title;
+                if (video) {
+                    // ডোমেইন টাইটেল এবং মেটা আপডেট
+                    document.title = video.title + " - Video Hub";
                     document.getElementById('vTitle').innerText = video.title;
-                    document.getElementById('vID').innerText = "VIDEO ID: " + video.id;
+                    document.getElementById('vID').innerText = "ID: " + video.id;
                     document.getElementById('vDur').innerText = "Duration: " + (video.duration || 'N/A');
                     
-                    // সরাসরি MP4 বা Embed লিঙ্কটি এখানে দিন
-                    // আমরা এখানে Google Proxy ব্যবহার করে Header বাইপাস করার চেষ্টা করছি
-                    const targetUrl = `https://www.xmishti.com/embed/${video.id}/`;
+                    // আপনার Cloudflare Worker এবং Xmishti Embed লজিক
+                    const workerUrl = "https://myproxy.kalamsuperkingsk.workers.dev/";
+                    const embedUrl = `https://www.xmishti.com/embed/${video.id}/`;
                     
-                    // Method: Google Gadget Proxy (এটি হেডার ক্লিন করে দেয়)
-                    const proxyUrl = `https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=${encodeURIComponent(targetUrl)}`;
+                    // প্রক্সি ইউআরএল জেনারেট করা
+                    const finalProxyUrl = `${workerUrl}?url=${encodeURIComponent(embedUrl)}`;
 
-                    document.getElementById('playerBox').innerHTML = `
-                        <iframe 
-                            src="${proxyUrl}" 
-                            style="width:100%; height:100%; border:none;" 
-                            allowfullscreen 
-                            loading="lazy">
-                        </iframe>`;
-                    
-                    // রিকমেন্ডেশন গ্রিড
-                    const recs = allVideos.sort(() => 0.5 - Math.random()).slice(0, 8);
+                    // আইফ্রেম ইনজেকশন
+                    setTimeout(() => {
+                        document.getElementById('playerBox').innerHTML = `
+                            <iframe 
+                                src="${finalProxyUrl}" 
+                                frameborder="0" 
+                                allowfullscreen 
+                                scrolling="no"
+                                allow="autoplay; encrypted-media"
+                                sandbox="allow-forms allow-scripts allow-same-origin allow-presentation">
+                            </iframe>`;
+                    }, 500);
+
+                    // রিকমেন্ডেশন গ্রিড (Randomize)
+                    const others = allVideos.filter(v => v.id != id);
+                    const shuffle = others.sort(() => 0.5 - Math.random()).slice(0, 12);
                     const recGrid = document.getElementById('rec-grid');
-                    recs.forEach(v => {
+                    
+                    shuffle.forEach(v => {
                         recGrid.innerHTML += `
-                            <div class="cursor-pointer group" onclick="window.location.href='video.html?id=${v.id}'">
-                                <div class="aspect-video rounded-lg overflow-hidden bg-gray-800 mb-2 ring-1 ring-gray-700">
-                                    <img src="${v.thumb}" class="w-full h-full object-cover group-hover:scale-105 transition-all">
+                            <div class="group cursor-pointer" onclick="window.location.href='video.html?id=${v.id}'">
+                                <div class="aspect-video rounded-xl overflow-hidden bg-slate-800 mb-3 ring-1 ring-slate-700 group-hover:ring-red-500 transition-all duration-300">
+                                    <img src="${v.thumb}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" loading="lazy">
+                                    <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-all"></div>
                                 </div>
-                                <h4 class="text-[11px] md:text-[13px] font-medium line-clamp-2">${v.title}</h4>
+                                <h4 class="text-[11px] md:text-[13px] font-semibold line-clamp-2 text-slate-300 group-hover:text-red-500 transition-colors">${v.title}</h4>
                             </div>`;
                     });
 
+                } else {
+                    document.getElementById('playerBox').innerHTML = `
+                        <div class="absolute inset-0 flex items-center justify-center bg-slate-900 text-red-500">
+                            Error: Video not found in database!
+                        </div>`;
                 }
             } catch (e) {
-                console.error(e);
+                console.error("Critical Error:", e);
+                document.getElementById('playerBox').innerHTML = `<div class="p-10 text-center text-red-400">Error loading data. Check JSON file.</div>`;
             }
         }
-        loadVideo();
+
+        // পেজ লোড হলে ফাংশন রান করুন
+        window.addEventListener('DOMContentLoaded', loadVideo);
     </script>
 </body>
 </html>
