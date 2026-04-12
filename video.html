@@ -1,33 +1,52 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Hub - Unlock Player</title>
+    <meta name="referrer" content="no-referrer">
+    <title>Video Hub - Safe Player</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #050b17; color: #e2e8f0; }
         .player-wrapper { 
             position: relative; width: 100%; aspect-ratio: 16/9; 
-            background: #000; border-radius: 12px; overflow: hidden; 
-            border: 1px solid #1e293b;
+            background: #000; border-radius: 16px; overflow: hidden; 
+            border: 1px solid #1e293b; box-shadow: 0 20px 50px rgba(0,0,0,0.7);
         }
         iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-        .unlock-overlay {
-            position: absolute; inset: 0; background: rgba(15, 23, 42, 0.95);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50;
+        
+        /* Blur Thumbnail Background */
+        #thumbBg {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; filter: blur(15px) brightness(0.3);
+            transform: scale(1.1);
         }
+
+        .unlock-overlay {
+            position: absolute; inset: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 50;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Spinning Timer Loader */
+        .timer-loader {
+            position: relative; width: 80px; height: 80px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid #ef4444; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="font-sans">
 
-    <header class="bg-slate-950/50 border-b border-slate-800 p-4 sticky top-0 z-50">
+    <header class="bg-slate-950/80 border-b border-slate-800 p-4 sticky top-0 z-50 backdrop-blur-md">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="index.html" class="text-red-500 font-bold flex items-center gap-2">
+            <a href="index.html" class="text-red-500 font-bold flex items-center gap-2 hover:text-red-400 transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                Back
+                BACK
             </a>
-            <div class="text-xl font-black italic">VIDEO<span class="text-red-600">HUB</span></div>
+            <div class="text-xl font-black italic tracking-tighter uppercase text-white">VIDEO<span class="text-red-600">HUB</span></div>
         </div>
     </header>
 
@@ -35,119 +54,124 @@
         <div class="max-w-4xl mx-auto">
             
             <div id="playerBox" class="player-wrapper">
-                <div id="unlockOverlay" class="unlock-overlay p-6 text-center">
-                    <div class="mb-4 p-3 bg-red-600/10 rounded-full">
-                        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                
+                <div id="lockScreen" class="h-full w-full relative">
+                    <img id="thumbBg" src="" alt="Background">
+                    
+                    <div class="unlock-overlay p-6 text-center">
+                        <div class="relative mb-6">
+                            <div class="timer-loader mx-auto"></div>
+                            <div id="countdownDisplay" class="absolute inset-0 flex items-center justify-center text-3xl font-black text-white">10</div>
+                        </div>
+                        
+                        <h3 class="text-lg md:text-xl font-bold text-white mb-2 uppercase tracking-wide">Connecting to Secure Server</h3>
+                        <p class="text-slate-400 text-xs mb-8">Please wait 10 seconds while we prepare your stream.</p>
+                        
+                        <a href="https://your-ad-link.com" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full font-bold text-xs shadow-2xl transition-all active:scale-95 uppercase tracking-widest">
+                            Unlock Instantly
+                        </a>
                     </div>
-                    <h3 class="text-lg font-bold text-white mb-2">ভিডিওটি লক করা আছে</h3>
-                    <p class="text-slate-400 text-sm mb-6">নিচের বাটনে ক্লিক করে ১০ সেকেন্ড অপেক্ষা করুন ভিডিওটি দেখার জন্য।</p>
-                    
-                    <button id="adBtn" onclick="handleAdClick()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-bold shadow-lg transition-all active:scale-95">
-                        OPEN AD TO UNLOCK
-                    </button>
-
-                    <button id="playBtn" style="display: none;" class="bg-green-600 hover:bg-green-700 text-white px-10 py-3 rounded-full font-bold shadow-lg animate-bounce">
-                        WATCH VIDEO NOW
-                    </button>
-                    
-                    <p id="timerText" class="mt-4 text-xs text-slate-500 hidden italic"></p>
                 </div>
 
                 <div id="videoContainer" class="hidden h-full w-full"></div>
             </div>
             
-            <div class="mt-6">
-                <h1 id="vTitle" class="text-xl md:text-2xl font-bold text-white uppercase">Loading Video...</h1>
-                <div class="mt-2 flex gap-4 text-slate-500 text-xs font-mono">
-                    <span id="vID">ID: --</span>
-                    <span id="vDur">--</span>
+            <div class="mt-8">
+                <h1 id="vTitle" class="text-xl md:text-3xl font-black text-white uppercase leading-tight tracking-tight">Loading Title...</h1>
+                <div class="mt-4 flex flex-wrap gap-4 text-slate-500 text-[10px] md:text-xs font-mono border-b border-slate-800 pb-8">
+                    <span id="vID" class="bg-slate-900 border border-slate-800 px-3 py-1 rounded text-red-600 font-bold">UID: --</span>
+                    <span id="vDur" class="bg-slate-900 border border-slate-800 px-3 py-1 rounded">DURATION: --</span>
+                    <span class="ml-auto flex items-center gap-1 text-green-500 font-bold uppercase tracking-widest">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Ultra HD
+                    </span>
                 </div>
             </div>
 
             <div class="mt-12">
-                <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
-                    <span class="w-1.5 h-5 bg-red-600 rounded-full"></span>
-                    Suggested Videos
+                <h3 class="text-lg font-black mb-6 flex items-center gap-3 uppercase tracking-tighter">
+                    <span class="w-1.5 h-6 bg-red-600 rounded-full"></span>
+                    Suggested For You
                 </h3>
-                <div id="rec-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                <div id="rec-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"></div>
             </div>
         </div>
     </main>
 
-    <script>
-        // --- কনফিগারেশন ---
-        const MY_AD_LINK = "https://your-ad-network-link.com"; // আপনার অ্যাডের লিঙ্ক এখানে দিন
-        let videoEmbedUrl = "";
+    <footer class="mt-20 border-t border-slate-900 p-10 text-center text-slate-600 text-[10px] uppercase tracking-widest">
+        <p>&copy; 2026 Developer Kabir Khan | All Rights Reserved</p>
+    </footer>
 
+    <script>
         async function initPage() {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
 
+            if(!id) {
+                window.location.href = 'index.html';
+                return;
+            }
+
             try {
-                const res = await fetch('video_data.json');
-                const data = await res.json();
+                const response = await fetch('video_data.json');
+                const data = await response.json();
                 const v = data.find(item => item.id == id);
 
                 if (v) {
-                    document.title = v.title;
+                    // Update Page Info
+                    document.title = v.title + " - Watch Now";
                     document.getElementById('vTitle').innerText = v.title;
-                    document.getElementById('vID').innerText = "ID: " + v.id;
-                    document.getElementById('vDur').innerText = v.duration || "N/A";
-                    
-                    // ভিডিওর আসল লিঙ্ক সেট করে রাখা
-                    videoEmbedUrl = `https://www.xmishti.com/embed/${v.id}/`;
+                    document.getElementById('vID').innerText = "UID: " + v.id;
+                    document.getElementById('vDur').innerText = "DUR: " + (v.duration || 'N/A');
+                    document.getElementById('thumbBg').src = v.thumb;
 
-                    // রিকমেন্ডেশন লোড
+                    // Start 10s Timer
+                    startCountdown(v.id);
+
+                    // Load Suggestions
                     renderRecs(data, id);
                 }
-            } catch (err) { console.error(err); }
+            } catch (err) { 
+                console.error("Data Load Error:", err); 
+            }
         }
 
-        function handleAdClick() {
-            // ১. নতুন ট্যাবে অ্যাড ওপেন করা
-            window.open(MY_AD_LINK, '_blank');
+        function startCountdown(vid) {
+            let seconds = 10;
+            const display = document.getElementById('countdownDisplay');
 
-            // ২. টাইমার এবং বাটন লজিক
-            const adBtn = document.getElementById('adBtn');
-            const timerText = document.getElementById('timerText');
-            const playBtn = document.getElementById('playBtn');
+            const timer = setInterval(() => {
+                seconds--;
+                display.innerText = seconds;
 
-            adBtn.style.display = 'none';
-            timerText.classList.remove('hidden');
-            
-            let timeLeft = 10; // ১০ সেকেন্ড অপেক্ষা
-            timerText.innerText = `অপেক্ষা করুন: ${timeLeft}s`;
-
-            const countdown = setInterval(() => {
-                timeLeft--;
-                timerText.innerText = `অপেক্ষা করুন: ${timeLeft}s`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
-                    timerText.classList.add('hidden');
-                    playBtn.style.display = 'block';
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    unlockPlayer(vid);
                 }
             }, 1000);
-
-            // ৩. প্লে বাটনে ক্লিক করলে ভিডিও দেখাবে
-            playBtn.onclick = () => {
-                document.getElementById('unlockOverlay').classList.add('hidden');
-                document.getElementById('videoContainer').classList.remove('hidden');
-                document.getElementById('videoContainer').innerHTML = `
-                    <iframe src="${videoEmbedUrl}" allowfullscreen referrerpolicy="no-referrer"></iframe>
-                `;
-            };
         }
 
-        function renderRecs(data, currentId) {
+        function unlockPlayer(id) {
+            document.getElementById('lockScreen').classList.add('hidden');
+            const container = document.getElementById('videoContainer');
+            container.classList.remove('hidden');
+            
+            // Injecting Embed Player
+            container.innerHTML = `
+                <iframe src="https://www.xmishti.com/embed/${id}/" allowfullscreen referrerpolicy="no-referrer"></iframe>
+            `;
+        }
+
+        function renderRecs(data, current) {
             const grid = document.getElementById('rec-grid');
-            data.filter(v => v.id != currentId).sort(() => 0.5 - Math.random()).slice(0, 8).forEach(v => {
+            const others = data.filter(v => v.id != current).sort(() => 0.5 - Math.random()).slice(0, 12);
+            
+            others.forEach(v => {
                 grid.innerHTML += `
                     <div class="cursor-pointer group" onclick="window.location.href='video.html?id=${v.id}'">
-                        <div class="aspect-video bg-slate-900 rounded-lg overflow-hidden mb-2 ring-1 ring-slate-800 group-hover:ring-red-600 transition-all">
-                            <img src="${v.thumb}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-500">
+                        <div class="aspect-video bg-slate-900 rounded-xl overflow-hidden mb-3 ring-1 ring-slate-800 group-hover:ring-red-600 transition-all duration-300">
+                            <img src="${v.thumb}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" loading="lazy">
                         </div>
-                        <h4 class="text-[11px] font-medium line-clamp-2 text-slate-400 group-hover:text-white">${v.title}</h4>
+                        <h4 class="text-[10px] md:text-[12px] font-bold line-clamp-2 text-slate-400 group-hover:text-white transition-colors uppercase tracking-tight">${v.title}</h4>
                     </div>`;
             });
         }
