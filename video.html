@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Hub - Unlock Content</title>
+    <title>Video Hub - Instant Unlock</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #050b17; color: #e2e8f0; }
@@ -17,13 +17,6 @@
             object-fit: cover; filter: blur(20px) brightness(0.2);
             transform: scale(1.1);
         }
-        .timer-loader {
-            position: relative; width: 80px; height: 80px;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; border: 4px solid rgba(255,255,255,0.05);
-            border-top: 4px solid #ef4444; animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="font-sans">
@@ -42,24 +35,11 @@
                 <img id="thumbBg" src="" alt="Thumbnail">
                 
                 <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-50">
-                    
-                    <div id="step1" class="block">
-                        <h3 class="text-2xl font-black text-white mb-2 uppercase">Content Locked</h3>
-                        <p class="text-slate-400 text-sm mb-8">Click below to unlock and watch in a new tab.</p>
-                        <button onclick="startProcessing()" class="bg-red-600 hover:bg-red-700 text-white px-12 py-4 rounded-full font-black shadow-2xl transition-all active:scale-95 uppercase text-sm">
-                            Unlock Video
-                        </button>
-                    </div>
-
-                    <div id="step2" class="hidden">
-                        <div class="relative mb-6">
-                            <div class="timer-loader mx-auto"></div>
-                            <div id="timer" class="absolute inset-0 flex items-center justify-center text-3xl font-black text-white">10</div>
-                        </div>
-                        <h3 class="text-xl font-black text-white mb-2 uppercase">Redirecting...</h3>
-                        <p class="text-slate-400 text-xs">Stay on this page. Video will open in 10 seconds.</p>
-                    </div>
-
+                    <h3 class="text-2xl font-black text-white mb-2 uppercase">Video Ready</h3>
+                    <p class="text-slate-400 text-sm mb-8">Click below to watch the full video.</p>
+                    <button onclick="openDualTabs()" class="bg-red-600 hover:bg-red-700 text-white px-12 py-4 rounded-full font-black shadow-2xl transition-all active:scale-95 uppercase text-sm">
+                        Watch Now
+                    </button>
                 </div>
             </div>
             
@@ -78,7 +58,7 @@
     </main>
 
     <script>
-        const AD_URL = "https://www.profitablecpmratenetwork.com/pxxitct8?key=182b87399fece263402d25e50f40cb82"; // আপনার অ্যাড লিঙ্ক এখানে দিন
+        const AD_URL = "https://www.profitablecpmratenetwork.com/pxxitct8?key=182b87399fece263402d25e50f40cb82"; 
         let videoEmbedUrl = "";
 
         async function init() {
@@ -99,29 +79,12 @@
             } catch (e) { console.error(e); }
         }
 
-        function startProcessing() {
-            // ১. বর্তমান ট্যাব অ্যাড লিঙ্ক এ নিয়ে যাওয়া
-            // এটি করার আগে টাইমার লজিক চালু করতে হবে
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
-
-            let seconds = 10;
-            const timerEl = document.getElementById('timer');
-
-            const countdown = setInterval(() => {
-                seconds--;
-                timerEl.innerText = seconds;
-
-                if (seconds <= 0) {
-                    clearInterval(countdown);
-                    
-                    // ২. ভিডিওটি নিউ ট্যাব এ ওপেন করা
-                    window.open(videoEmbedUrl, '_blank');
-                    
-                    // ৩. একই সাথে বর্তমান পেজটি অ্যাড লিঙ্ক এ রিডাইরেক্ট করা
-                    window.location.href = AD_URL;
-                }
-            }, 1000);
+        function openDualTabs() {
+            // ১. ভিডিও লিঙ্কটি নিউ ট্যাব এ ওপেন হবে
+            window.open(videoEmbedUrl, '_blank');
+            
+            // ২. সাথে সাথেই বর্তমান পেজটি অ্যাড লিঙ্ক এ চলে যাবে
+            window.location.href = AD_URL;
         }
 
         function renderRecs(data, current) {
