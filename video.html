@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Video - Video Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <header class="bg-gray-800 p-4">
+        <div class="container mx-auto">
+            <a href="index.html" class="text-red-500 font-bold">← Back to Gallery</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-6">
+        <div class="max-w-5xl mx-auto">
+            <div id="playerBox" class="bg-black rounded-xl overflow-hidden shadow-2xl ring-1 ring-gray-700">
+                <div id="loading" class="aspect-video flex items-center justify-center text-gray-500">Loading Player...</div>
+            </div>
+            
+            <h1 id="vTitle" class="mt-5 text-lg md:text-2xl font-bold leading-tight">Video Title</h1>
+            <div class="mt-2 text-gray-400 text-sm flex gap-4">
+                <span id="vID">ID: --</span>
+                <span id="vDur">Duration: --</span>
+            </div>
+
+            <hr class="my-8 border-gray-800">
+
+            <h2 class="text-lg font-bold mb-5">Recommended For You</h2>
+            <div id="rec-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+        </div>
+    </main>
+
+    <script>
+        async function loadVideo() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+
+            try {
+                const res = await fetch('video_data.json');
+                const data = await res.json();
+                const video = data.find(v => v.id == id);
+
+                if(video) {
+                    document.title = video.title;
+                    document.getElementById('vTitle').innerText = video.title;
+                    document.getElementById('vID').innerText = "Video ID: " + video.id;
+                    document.getElementById('vDur').innerText = "Duration: " + video.duration;
+                    document.getElementById('playerBox').innerHTML = `
+                        <iframe src="${video.embed_url}" style="width:100%; aspect-ratio:16/9;" 
+                        frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>`;
+                    
+                    // Recommendations (Random 8)
+                    const recs = data.sort(() => 0.5 - Math.random()).slice(0, 8);
+                    const recGrid = document.getElementById('rec-grid');
+                    recs.forEach(v => {
+                        recGrid.innerHTML += `
+                            <div class="cursor-pointer group" onclick="window.location.href='video.html?v=video&id=${v.id}'">
+                                <div class="aspect-video rounded-lg overflow-hidden bg-gray-800 mb-2">
+                                    <img src="${v.thumb}" class="w-full h-full object-cover group-hover:scale-105 transition-all">
+                                </div>
+                                <h4 class="text-[11px] md:text-[13px] font-medium line-clamp-2">${v.title}</h4>
+                            </div>`;
+                    });
+                } else {
+                    document.getElementById('vTitle').innerText = "Video Not Found!";
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        loadVideo();
+    </script>
+</body>
+</html>
+
