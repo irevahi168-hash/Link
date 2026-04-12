@@ -7,8 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0c0f16; color: #a0aec0; }
-        .nav-link:hover { color: #f56565; }
-        /* আগের মতো থাম্বনেইলের উপর টাইটেল দেখানোর জন্য */
         .video-title-overlay {
             background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
         }
@@ -17,52 +15,54 @@
 <body class="font-sans">
 
     <nav class="p-3 border-b border-gray-800 flex justify-between items-center sticky top-0 z-50 bg-[#0c0f16]">
-        <div class="flex items-center gap-6">
-            <div class="text-xl font-extrabold italic text-white uppercase tracking-tight">VIDEO<span class="text-red-600">HUB</span></div>
-            <div class="hidden md:flex gap-4 text-xs uppercase font-bold text-gray-400">
-                <a href="#" class="nav-link text-white">Home</a>
-                <a href="#" class="nav-link">Categories</a>
-                <a href="#" class="nav-link">New Videos</a>
-            </div>
-        </div>
+        <div class="text-xl font-extrabold italic text-white uppercase tracking-tight">VIDEO<span class="text-red-600">HUB</span></div>
         <div class="relative w-1/2 md:w-1/4">
             <input type="text" id="searchInput" onkeyup="searchVideos()" placeholder="Search videos..." class="w-full bg-gray-900 border border-gray-700 rounded-md py-1.5 px-3 text-[11px] text-gray-300 focus:outline-none focus:border-red-600">
         </div>
     </nav>
 
     <main class="container mx-auto px-2 py-6">
-        <h2 class="text-sm font-bold uppercase tracking-tight text-white mb-5 border-b border-gray-800 pb-3 flex items-center gap-2">
-            <span class="w-1.5 h-4 bg-red-600 rounded"></span>
-            Recent Videos
-        </h2>
-        
         <div id="videoGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-            </div>
+            <div id="loader" class="col-span-full text-center py-20 text-xs uppercase tracking-widest animate-pulse">Loading Videos...</div>
+        </div>
     </main>
 
     <script>
+        const CDN_BASE = "https://cdn.xmishti.com"; // আপনার ভিডিওর মেইন সার্ভার
         let allVideos = [];
 
         async function loadVideos() {
             try {
-                // আপনার bulk extractor স্ক্রিপ্ট দিয়ে তৈরি করা JSON ফাইল
                 const response = await fetch('video_data.json');
                 allVideos = await response.json();
+                
+                document.getElementById('loader').remove(); // লোডার রিমুভ করা
                 renderVideos(allVideos);
-            } catch (err) { console.error("Error loading JSON:", err); }
+            } catch (err) { 
+                console.error("Error loading JSON:", err);
+                document.getElementById('loader').innerText = "Failed to load videos.";
+            }
         }
 
         function renderVideos(data) {
             const grid = document.getElementById('videoGrid');
-            grid.innerHTML = data.map(v => `
+            grid.innerHTML = data.map(v => {
+                // আপনার JSON-এ থাকা direct_url থেকে .mp4 বাদ দিয়ে .jpg করা হচ্ছে থাম্বনেইলের জন্য
+                const thumbUrl = CDN_BASE + v.direct_url.replace('.mp4', '.jpg');
+                
+                return `
                 <div class="relative aspect-video bg-gray-900 rounded-md overflow-hidden cursor-pointer group shadow-lg" onclick="window.location.href='video.html?id=${v.id}'">
-                    <img src="${v.thumb}" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-300" loading="lazy">
+                    <img src="${thumbUrl}" 
+                         alt="${v.title}" 
+                         class="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                         onerror="this.src='https://via.placeholder.com/320x180/1a1d24/ffffff?text=No+Image'">
                     
-                    <div class="absolute inset-0 video-title-overlay flex items-end p-2 transition-opacity duration-300 opacity-90 group-hover:opacity-100">
-                        <h3 class="text-[11px] md:text-[12px] font-medium text-white line-clamp-2 leading-tight">${v.title}</h3>
+                    <div class="absolute inset-0 video-title-overlay flex items-end p-2 opacity-90 group-hover:opacity-100">
+                        <h3 class="text-[11px] md:text-[12px] font-medium text-white line-clamp-1 leading-tight">${v.title}</h3>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function searchVideos() {
