@@ -3,37 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Hub - Redirecting...</title>
+    <title>Video Hub - Unlock Content</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #050b17; color: #e2e8f0; }
         .player-wrapper { 
             position: relative; width: 100%; aspect-ratio: 16/9; 
-            background: #000; border-radius: 16px; overflow: hidden; 
-            border: 1px solid #1e293b; box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            background: #000; border-radius: 20px; overflow: hidden; 
+            border: 1px solid #1e293b; box-shadow: 0 25px 50px rgba(0,0,0,0.8);
         }
         #thumbBg {
             position: absolute; inset: 0; width: 100%; height: 100%;
-            object-fit: cover; filter: blur(15px) brightness(0.3);
+            object-fit: cover; filter: blur(20px) brightness(0.2);
             transform: scale(1.1);
         }
         .timer-loader {
             position: relative; width: 80px; height: 80px;
             display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; border: 3px solid rgba(255,255,255,0.1);
-            border-top: 3px solid #ef4444; animation: spin 1s linear infinite;
+            border-radius: 50%; border: 4px solid rgba(255,255,255,0.05);
+            border-top: 4px solid #ef4444; animation: spin 0.8s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="font-sans">
 
-    <header class="bg-slate-950/80 border-b border-slate-800 p-4 sticky top-0 z-50 backdrop-blur-md">
+    <header class="bg-slate-950/90 border-b border-slate-800 p-4 sticky top-0 z-50 backdrop-blur-lg">
         <div class="container mx-auto flex justify-between items-center">
-            <a href="index.html" class="text-red-500 font-bold flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                BACK
-            </a>
+            <a href="index.html" class="text-red-600 font-bold flex items-center gap-2 uppercase">BACK</a>
             <div class="text-xl font-black italic tracking-tighter uppercase text-white">VIDEO<span class="text-red-600">HUB</span></div>
         </div>
     </header>
@@ -42,42 +39,37 @@
         <div class="max-w-4xl mx-auto">
             
             <div id="playerBox" class="player-wrapper">
-                <img id="thumbBg" src="" alt="Background">
+                <img id="thumbBg" src="" alt="Thumbnail">
                 
                 <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-50">
-                    <div id="preClick" class="block">
-                        <div class="mb-6 p-4 bg-red-600/20 rounded-full inline-block">
-                            <svg class="w-10 h-10 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/></svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2 uppercase">Video is Locked</h3>
-                        <p class="text-slate-400 text-sm mb-8">Click the button below to unlock and watch.</p>
-                        <button onclick="startUnlockProcess()" class="bg-red-600 hover:bg-red-700 text-white px-10 py-4 rounded-full font-black shadow-2xl transition-all active:scale-95 uppercase tracking-widest">
+                    
+                    <div id="step1" class="block">
+                        <h3 class="text-2xl font-black text-white mb-2 uppercase">Content Locked</h3>
+                        <p class="text-slate-400 text-sm mb-8">Click below to unlock and watch in a new tab.</p>
+                        <button onclick="startProcessing()" class="bg-red-600 hover:bg-red-700 text-white px-12 py-4 rounded-full font-black shadow-2xl transition-all active:scale-95 uppercase text-sm">
                             Unlock Video
                         </button>
                     </div>
 
-                    <div id="postClick" class="hidden">
+                    <div id="step2" class="hidden">
                         <div class="relative mb-6">
                             <div class="timer-loader mx-auto"></div>
-                            <div id="countdown" class="absolute inset-0 flex items-center justify-center text-3xl font-black text-white">10</div>
+                            <div id="timer" class="absolute inset-0 flex items-center justify-center text-3xl font-black text-white">10</div>
                         </div>
-                        <h3 class="text-lg font-bold text-white mb-2 uppercase">Processing...</h3>
-                        <p class="text-slate-400 text-xs">Please wait 10 seconds. You will be redirected automatically.</p>
+                        <h3 class="text-xl font-black text-white mb-2 uppercase">Redirecting...</h3>
+                        <p class="text-slate-400 text-xs">Stay on this page. Video will open in 10 seconds.</p>
                     </div>
+
                 </div>
             </div>
             
             <div class="mt-8">
-                <h1 id="vTitle" class="text-xl md:text-3xl font-black text-white uppercase leading-tight">Loading Title...</h1>
-                <div class="mt-4 flex gap-4 text-slate-500 text-[10px] font-mono border-b border-slate-800 pb-8">
-                    <span id="vID" class="text-red-600 font-bold">UID: --</span>
-                    <span id="vDur">DURATION: --</span>
-                </div>
+                <h1 id="vTitle" class="text-xl md:text-3xl font-black text-white uppercase tracking-tighter leading-tight text-left">Loading...</h1>
             </div>
 
             <div class="mt-12">
-                <h3 class="text-lg font-black mb-6 flex items-center gap-3 uppercase">
-                    <span class="w-1.5 h-6 bg-red-600 rounded-full"></span>
+                <h3 class="text-lg font-black mb-6 uppercase tracking-tighter">
+                    <span class="w-1.5 h-6 bg-red-600 rounded-full inline-block mr-2 align-middle"></span>
                     Suggested For You
                 </h3>
                 <div id="rec-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"></div>
@@ -86,52 +78,48 @@
     </main>
 
     <script>
-        const AD_LINK = "https://your-ad-link.com"; // Replace with your Ad link
-        let targetVideoUrl = "";
+        const AD_URL = "https://your-ad-link.com"; // আপনার অ্যাড লিঙ্ক এখানে দিন
+        let videoEmbedUrl = "";
 
-        async function initPage() {
+        async function init() {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
 
             try {
                 const response = await fetch('video_data.json');
-                const data = await response.json();
-                const v = data.find(item => item.id == id);
+                const videos = await response.json();
+                const video = videos.find(v => v.id == id);
 
-                if (v) {
-                    document.getElementById('vTitle').innerText = v.title;
-                    document.getElementById('vID').innerText = "UID: " + v.id;
-                    document.getElementById('vDur').innerText = "DUR: " + (v.duration || 'N/A');
-                    document.getElementById('thumbBg').src = v.thumb;
-                    
-                    // Set final redirect URL
-                    targetVideoUrl = `https://www.xmishti.com/embed/${v.id}/`;
-
-                    renderRecs(data, id);
+                if (video) {
+                    document.getElementById('vTitle').innerText = video.title;
+                    document.getElementById('thumbBg').src = video.thumb;
+                    videoEmbedUrl = `https://www.xmishti.com/embed/${video.id}/`;
+                    renderRecs(videos, id);
                 }
-            } catch (err) { console.error(err); }
+            } catch (e) { console.error(e); }
         }
 
-        function startUnlockProcess() {
-            // 1. Open Ad in new tab
-            window.open(AD_LINK, '_blank');
+        function startProcessing() {
+            // ১. বর্তমান ট্যাব অ্যাড লিঙ্ক এ নিয়ে যাওয়া
+            // এটি করার আগে টাইমার লজিক চালু করতে হবে
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
 
-            // 2. Hide pre-click UI and show Timer UI
-            document.getElementById('preClick').classList.add('hidden');
-            document.getElementById('postClick').classList.remove('hidden');
+            let seconds = 10;
+            const timerEl = document.getElementById('timer');
 
-            // 3. Start 10s Countdown
-            let timeLeft = 10;
-            const display = document.getElementById('countdown');
+            const countdown = setInterval(() => {
+                seconds--;
+                timerEl.innerText = seconds;
 
-            const timer = setInterval(() => {
-                timeLeft--;
-                display.innerText = timeLeft;
-
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    // 4. Final Direct Redirect
-                    window.location.href = targetVideoUrl;
+                if (seconds <= 0) {
+                    clearInterval(countdown);
+                    
+                    // ২. ভিডিওটি নিউ ট্যাব এ ওপেন করা
+                    window.open(videoEmbedUrl, '_blank');
+                    
+                    // ৩. একই সাথে বর্তমান পেজটি অ্যাড লিঙ্ক এ রিডাইরেক্ট করা
+                    window.location.href = AD_URL;
                 }
             }, 1000);
         }
@@ -144,12 +132,12 @@
                         <div class="aspect-video bg-slate-900 rounded-xl overflow-hidden mb-3 ring-1 ring-slate-800 group-hover:ring-red-600 transition-all">
                             <img src="${v.thumb}" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-500">
                         </div>
-                        <h4 class="text-[10px] font-bold line-clamp-2 text-slate-400 uppercase">${v.title}</h4>
+                        <h4 class="text-[10px] font-bold line-clamp-2 text-slate-500 group-hover:text-white uppercase tracking-tight transition-colors">${v.title}</h4>
                     </div>`;
             });
         }
 
-        window.onload = initPage;
+        window.onload = init;
     </script>
 </body>
 </html>
