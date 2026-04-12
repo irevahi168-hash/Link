@@ -25,9 +25,9 @@
 
     <main class="container mx-auto px-4 py-8">
         <section class="mb-12">
-            <h2 class="text-xl font-bold mb-6 border-l-4 border-red-500 pl-3">Latest Updates (Daily Mix)</h2>
+            <h2 class="text-xl font-bold mb-6 border-l-4 border-red-500 pl-3">Latest Updates</h2>
             <div id="latest-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                <p class="text-gray-500">Loading videos...</p>
+                <p class="text-gray-500 italic">ভিডিও লোড হচ্ছে...</p>
             </div>
         </section>
 
@@ -38,12 +38,12 @@
         </section>
     </main>
 
-    <footer class="bg-gray-800 p-8 text-center text-gray-500 text-sm">
+    <footer class="bg-gray-800 p-8 text-center text-gray-500 text-sm mt-10">
         <p>&copy; 2026 Developer Kabir Khan</p>
     </footer>
 
     <script>
-        // টাইটেল থেকে URL Friendly Slug তৈরি
+        // URL-এর জন্য টাইটেল ক্লিন করা
         function slugify(text) {
             return text.toString().toLowerCase()
                 .replace(/\s+/g, '-')
@@ -55,12 +55,12 @@
 
         async function init() {
             try {
+                // একটি মাত্র JSON ফাইল লোড
                 const response = await fetch('video_data.json');
                 const allVideos = await response.json();
 
-                // প্রতিদিন আলাদা সিড (Seed) জেনারেট করা
+                // প্রতিদিন আলাদা সিরিয়াল (Shuffle) করার লজিক
                 const todaySeed = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-                
                 function shuffle(array, seed) {
                     let m = array.length, t, i;
                     let random = () => {
@@ -78,11 +78,13 @@
 
                 const dailyVideos = shuffle([...allVideos], parseInt(todaySeed));
                 
-                render('latest-grid', dailyVideos.slice(0, 16));
-                render('popular-grid', dailyVideos.slice(16, 32));
+                // প্রথম ২০টি লেটেস্ট, পরের ২০টি পপুলার
+                render('latest-grid', dailyVideos.slice(0, 20));
+                render('popular-grid', dailyVideos.slice(20, 40));
 
             } catch (e) {
-                console.error("Data error:", e);
+                console.error("Data Load Error:", e);
+                document.getElementById('latest-grid').innerHTML = "ভিডিও লোড করা সম্ভব হয়নি।";
             }
         }
 
@@ -90,12 +92,12 @@
             const grid = document.getElementById(id);
             grid.innerHTML = '';
             items.forEach(v => {
-                const slug = slugify(v.title);
+                const slug = slugify(v.title || "video");
                 grid.innerHTML += `
                     <div class="video-card bg-gray-800 rounded-lg overflow-hidden cursor-pointer shadow-lg transition-all" 
                          onclick="window.location.href='video.html?v=${slug}&id=${v.id}'">
-                        <div class="aspect-video relative overflow-hidden">
-                            <img src="${v.thumb}" class="w-full h-full object-cover transition-all duration-500">
+                        <div class="aspect-video relative overflow-hidden bg-gray-700">
+                            <img src="${v.thumb}" class="w-full h-full object-cover transition-all duration-500" loading="lazy">
                             <span class="absolute bottom-1 right-1 bg-black/80 text-[10px] px-1.5 py-0.5 rounded">${v.duration || 'N/A'}</span>
                         </div>
                         <div class="p-3">
@@ -108,4 +110,3 @@
     </script>
 </body>
 </html>
-
