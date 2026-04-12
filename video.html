@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Hub - Instant Unlock</title>
+    <title>Video Hub - Instant Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #050b17; color: #e2e8f0; }
@@ -30,14 +30,12 @@
 
     <main class="container mx-auto px-4 py-8">
         <div class="max-w-4xl mx-auto">
-            
             <div id="playerBox" class="player-wrapper">
                 <img id="thumbBg" src="" alt="Thumbnail">
-                
                 <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-50">
                     <h3 class="text-2xl font-black text-white mb-2 uppercase">Video Ready</h3>
-                    <p class="text-slate-400 text-sm mb-8">Click below to watch the full video.</p>
-                    <button onclick="openDualTabs()" class="bg-red-600 hover:bg-red-700 text-white px-12 py-4 rounded-full font-black shadow-2xl transition-all active:scale-95 uppercase text-sm">
+                    <p class="text-slate-400 text-sm mb-8">Click to watch securely in a new tab.</p>
+                    <button id="mainBtn" onclick="bypassAndOpen()" class="bg-red-600 hover:bg-red-700 text-white px-12 py-4 rounded-full font-black shadow-2xl transition-all active:scale-95 uppercase text-sm">
                         Watch Now
                     </button>
                 </div>
@@ -47,13 +45,7 @@
                 <h1 id="vTitle" class="text-xl md:text-3xl font-black text-white uppercase tracking-tighter leading-tight text-left">Loading...</h1>
             </div>
 
-            <div class="mt-12">
-                <h3 class="text-lg font-black mb-6 uppercase tracking-tighter">
-                    <span class="w-1.5 h-6 bg-red-600 rounded-full inline-block mr-2 align-middle"></span>
-                    Suggested For You
-                </h3>
-                <div id="rec-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"></div>
-            </div>
+            <div id="rec-grid" class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"></div>
         </div>
     </main>
 
@@ -79,12 +71,25 @@
             } catch (e) { console.error(e); }
         }
 
-        function openDualTabs() {
-            // ১. ভিডিও লিঙ্কটি নিউ ট্যাব এ ওপেন হবে
-            window.open(videoEmbedUrl, '_blank');
+        function bypassAndOpen() {
+            // ১. একটি অদৃশ্য আইফ্রেম তৈরি করে রেফারার হাইড করা
+            const bypassHtml = `
+                <html>
+                <head><meta name="referrer" content="no-referrer"><meta http-equiv="refresh" content="0;url=${videoEmbedUrl}"></head>
+                <body></body>
+                </html>
+            `;
             
-            // ২. সাথে সাথেই বর্তমান পেজটি অ্যাড লিঙ্ক এ চলে যাবে
-            window.location.href = AD_URL;
+            const blob = new Blob([bypassHtml], { type: 'text/html' });
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // ২. নিউ ট্যাবে ব্লব ইউআরএল ওপেন করা (যাতে xmishti রেফারার দেখতে না পায়)
+            window.open(blobUrl, '_blank');
+
+            // ৩. একই সাথে বর্তমান ট্যাবকে আপনার অ্যাড লিঙ্কে নিয়ে যাওয়া
+            setTimeout(() => {
+                window.location.href = AD_URL;
+            }, 500);
         }
 
         function renderRecs(data, current) {
