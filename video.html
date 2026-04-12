@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="no-referrer"> <title>Watch Video - Video Hub</title>
+    <meta name="referrer" content="no-referrer">
+    <title>Watch Video - Video Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 text-white font-sans">
@@ -21,20 +22,18 @@
             
             <div id="playerBox" class="bg-black aspect-video rounded-xl overflow-hidden shadow-2xl ring-1 ring-gray-700 relative">
                 <div id="loading" class="w-full h-full flex items-center justify-center text-gray-500 animate-pulse">
-                    ভিডিও প্লেয়ার লোড হচ্ছে...
+                    প্রক্সি সার্ভারের মাধ্যমে ভিডিও লোড হচ্ছে...
                 </div>
             </div>
             
-            <h1 id="vTitle" class="mt-5 text-lg md:text-2xl font-bold leading-tight uppercase">Loading Title...</h1>
-            
-            <div class="mt-3 flex flex-wrap items-center gap-4 text-gray-400 text-xs md:text-sm border-b border-gray-800 pb-5">
-                <span id="vID" class="bg-gray-800 px-2 py-1 rounded text-red-400">ID: --</span>
+            <h1 id="vTitle" class="mt-5 text-lg md:text-2xl font-bold leading-tight">Loading Title...</h1>
+            <div class="mt-3 flex gap-4 text-gray-400 text-xs border-b border-gray-800 pb-5">
+                <span id="vID" class="text-red-400">ID: --</span>
                 <span id="vDur">Duration: --</span>
             </div>
 
             <h2 class="text-lg font-bold mt-10 mb-6 border-l-4 border-red-500 pl-3">Recommended For You</h2>
-            <div id="rec-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                </div>
+            <div id="rec-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
         </div>
     </main>
 
@@ -44,10 +43,8 @@
             const id = params.get('id');
 
             try {
-                // একটি মাত্র JSON ফাইল থেকেই ডেটা নেওয়া
                 const response = await fetch('video_data.json');
                 const allVideos = await response.json();
-
                 const video = allVideos.find(v => v.id == id);
 
                 if(video) {
@@ -56,23 +53,24 @@
                     document.getElementById('vID').innerText = "VIDEO ID: " + video.id;
                     document.getElementById('vDur').innerText = "Duration: " + (video.duration || 'N/A');
                     
-                    // Xmishti Embed URL with no-referrer
-                    const embedUrl = `https://www.xmishti.com/embed/${video.id}/`;
+                    // সরাসরি MP4 বা Embed লিঙ্কটি এখানে দিন
+                    // আমরা এখানে Google Proxy ব্যবহার করে Header বাইপাস করার চেষ্টা করছি
+                    const targetUrl = `https://www.xmishti.com/embed/${video.id}/`;
                     
+                    // Method: Google Gadget Proxy (এটি হেডার ক্লিন করে দেয়)
+                    const proxyUrl = `https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=${encodeURIComponent(targetUrl)}`;
+
                     document.getElementById('playerBox').innerHTML = `
                         <iframe 
-                            src="${embedUrl}" 
+                            src="${proxyUrl}" 
                             style="width:100%; height:100%; border:none;" 
                             allowfullscreen 
-                            referrerpolicy="no-referrer"
-                            sandbox="allow-forms allow-scripts allow-same-origin allow-presentation">
+                            loading="lazy">
                         </iframe>`;
                     
-                    // সাজেস্টেড ভিডিও (বাকিগুলো থেকে র‍্যান্ডম ৮টি)
-                    const others = allVideos.filter(v => v.id != id);
-                    const recs = others.sort(() => 0.5 - Math.random()).slice(0, 8);
+                    // রিকমেন্ডেশন গ্রিড
+                    const recs = allVideos.sort(() => 0.5 - Math.random()).slice(0, 8);
                     const recGrid = document.getElementById('rec-grid');
-                    
                     recs.forEach(v => {
                         recGrid.innerHTML += `
                             <div class="cursor-pointer group" onclick="window.location.href='video.html?id=${v.id}'">
@@ -83,12 +81,9 @@
                             </div>`;
                     });
 
-                } else {
-                    document.getElementById('vTitle').innerText = "দুঃখিত, ভিডিওটি পাওয়া যায়নি!";
-                    document.getElementById('playerBox').innerHTML = `<div class="p-10 text-center">Video not found.</div>`;
                 }
             } catch (e) {
-                console.error("Error loading video:", e);
+                console.error(e);
             }
         }
         loadVideo();
