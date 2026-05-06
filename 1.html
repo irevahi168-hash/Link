@@ -1,127 +1,115 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Player - Locked</title>
+    <title>Video Content Locker</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
         }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        .card {
+            background: #1e1e1e;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             text-align: center;
-            max-width: 600px;
+            max-width: 500px;
             width: 90%;
         }
-        #timer-box h3 {
-            color: #333;
+        .timer-text {
+            font-size: 18px;
+            margin-bottom: 20px;
         }
         #seconds {
-            font-size: 24px;
-            color: #e74c3c;
+            font-size: 32px;
+            color: #ff4757;
             font-weight: bold;
         }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        #video-content {
+        .unlock-btn {
             display: none;
-            animation: fadeIn 0.5s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .video-wrapper {
-            position: relative;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-            height: 0;
-            overflow: hidden;
-            border-radius: 8px;
-            background: #000;
-        }
-        .video-wrapper iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        .btn {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 25px;
-            background-color: #007bff;
+            background-color: #2ed573;
             color: white;
+            padding: 15px 30px;
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 8px;
             font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
             transition: 0.3s;
         }
-        .btn:hover {
-            background-color: #0056b3;
+        .unlock-btn:hover {
+            background-color: #2ecc71;
+            transform: scale(1.05);
+        }
+        #video-player {
+            display: none;
+            margin-top: 20px;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #000;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div id="timer-box">
-        <h3>ভিডিওটি আনলক হচ্ছে...</h3>
-        <div class="loader"></div>
-        <p>দয়া করে <span id="seconds">5</span> সেকেন্ড অপেক্ষা করুন</p>
+<div class="card">
+    <div id="status-area">
+        <h2 id="headline">Content is Locked</h2>
+        <p class="timer-text" id="timer-msg">Please wait <span id="seconds">5</span> seconds to unlock...</p>
+        <button class="unlock-btn" id="unlockBtn" onclick="unlockContent()">UNLOCK VIDEO</button>
     </div>
 
-    <div id="video-content">
-        <h3 style="color: #2ecc71;">ভিডিওটি এখন দেখার জন্য প্রস্তুত!</h3>
-        
-        <div class="video-wrapper">
+    <div id="video-player">
+        <h3>Enjoy your video!</h3>
+        <div class="video-container">
             <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
         </div>
-
-        <br>
-        <a href="YOUR_ADSTERRA_DIRECT_LINK" class="btn" target="_blank">Download / Watch in HD</a>
     </div>
 </div>
 
 <script>
-    var timeLeft = 5; // এখানে আপনি সময় কমাতে বা বাড়াতে পারেন
-    var timerElement = document.getElementById("seconds");
-    var timerBox = document.getElementById("timer-box");
-    var videoContent = document.getElementById("video-content");
+    var timeLeft = 5;
+    var directLink = "www.google.com"; // এখানে আপনার অ্যাড লিঙ্ক দিন
 
-    var downloadTimer = setInterval(function(){
-        if(timeLeft <= 0){
-            clearInterval(downloadTimer);
-            timerBox.style.display = "none";
-            videoContent.style.display = "block";
-        } else {
-            timerElement.innerHTML = timeLeft;
+    var countdown = setInterval(function() {
+        timeLeft--;
+        document.getElementById("seconds").textContent = timeLeft;
+        
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            document.getElementById("timer-msg").style.display = "none";
+            document.getElementById("unlockBtn").style.display = "inline-block";
+            document.getElementById("headline").textContent = "Ready to Unlock";
         }
-        timeLeft -= 1;
     }, 1000);
+
+    function unlockContent() {
+        // নতুন ট্যাবে অ্যাড লিঙ্ক ওপেন হবে
+        window.open(directLink, '_blank');
+        
+        // একই সাথে নিচের ভিডিওটি শো করবে
+        document.getElementById("status-area").style.display = "none";
+        document.getElementById("video-player").style.display = "block";
+    }
 </script>
 
 </body>
 </html>
-
