@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player - Locked</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+        }
+        #timer-box h3 {
+            color: #333;
+        }
+        #seconds {
+            font-size: 24px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #video-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #000;
+        }
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="timer-box">
+        <h3>ভিডিওটি আনলক হচ্ছে...</h3>
+        <div class="loader"></div>
+        <p>দয়া করে <span id="seconds">5</span> সেকেন্ড অপেক্ষা করুন</p>
+    </div>
+
+    <div id="video-content">
+        <h3 style="color: #2ecc71;">ভিডিওটি এখন দেখার জন্য প্রস্তুত!</h3>
+        
+        <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
+        </div>
+
+        <br>
+        <a href="YOUR_ADSTERRA_DIRECT_LINK" class="btn" target="_blank">Download / Watch in HD</a>
+    </div>
+</div>
+
+<script>
+    var timeLeft = 5; // এখানে আপনি সময় কমাতে বা বাড়াতে পারেন
+    var timerElement = document.getElementById("seconds");
+    var timerBox = document.getElementById("timer-box");
+    var videoContent = document.getElementById("video-content");
+
+    var downloadTimer = setInterval(function(){
+        if(timeLeft <= 0){
+            clearInterval(downloadTimer);
+            timerBox.style.display = "none";
+            videoContent.style.display = "block";
+        } else {
+            timerElement.innerHTML = timeLeft;
+        }
+        timeLeft -= 1;
+    }, 1000);
+</script>
+
+</body>
+</html>
+
